@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>myMemoPad</title>
+<script src="js/jquery-2.1.3.min.js"></script>
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/sample.css">
+</head>
+
+<body>
+<!-- 【作品概要】
+仕事で出張に行く際、子供を連れて帰省する際など、忘れ物をしないよう、持ち物リストを作成・保存しておく。
+次に買物にいった際に買う物リストや、来週中にやらないといけない仕事リストとしても応用可能。
+終わった物からチェックを付けていくだけ。
+
+【画面構成】
+    タイトルエリア
+
+    チェックリストエリア
+    １行目：チェックボックス(on/off) - 持ち物名 - ×マーク(行削除)
+    ２行目：‥‥
+    ３行目：‥‥
+
+    行追加ボタン - 保存ボタン - チェック全解除ボタン
+
+    保存済みチェックリスト一覧エリア
+    選択ボタン１ - チェックリストタイトル１ - チェックリスト削除ボタン１
+    選択ボタン２ - チェックリストタイトル２ - チェックリスト削除ボタン２
+    ‥‥
+    ‥‥
+
+【仕様】
+チェック一斉解除ボタンで、チェックリストエリアに表示中のチェックボックスが全てクリアされる。
+持ち物名に文字を入力確定すれば、自動的に新規行追加。
+持ち物名が空欄の行は１つしか表示されない。(常に一つは表示されている。)
+各行の×マークは持ち物名を空欄化。(つまり、空欄行が2つある場合は行削除)
+チェックリストエリアに表示されているチェックリストは編集可能。
+チェックリスト保存ボタンでローカルストレージに保存・更新。(保存を押さなければ保存されない)
+画面下部のチェックリスト一覧エリアには、ローカルストレージの内容を表示。
+選択ボタンを押すとチェックリストエリアの表示内容が置き換わる。
+削除ボタンでチェックリストを削除。
+チェックリストエリアに変更を加え、保存を押していない状態で選択ボタンを押すと、アラート表示。
+「現在のチェックリストは保存されていませんが、よろしいですか？」 -->
+
+<header>
+    <div class="header">
+        <h1>出張持ち物リスト</h1>
+        <p>出張行く時って、いつもだいたい同じ荷物なのに</br>何か忘れてそうで不安になるよね。</p>
+    </div>
+</header>
+
+<main>
+    <table>
+        <thead>
+            <th class="th1">チェック</th>
+            <th>持ち物</th>
+            <!-- <th>行削除</th> -->
+        </thead>
+    </table>
+
+    <table id="checklist">
+    </table>
+    <div class="button">
+        <button type="button" class="btn-brackets" id="coladd" onclick="coladd()">行追加</button>
+        <button type="button" class="btn-brackets" id="save">保存</button>
+        <button type="button" class="btn-brackets" id="check_clear">チェック全解除</button>
+    </div>
+</main>
+
+<script>
+// 行追加クリックイベント
+    function coladd() {
+        let lng = $("#checklist tr").length
+        let checklist = document.getElementById("checklist");
+        // 行を行末に追加
+        let row = checklist.insertRow(-1);
+        //td分追加
+        let cell1 = row.insertCell(-1);
+        let cell2 = row.insertCell(-1);
+        // let cell3 = row.insertCell(-1);
+        // セルの内容入力
+        cell1.innerHTML = '<input type="checkbox" id="check_box'+lng+'">';
+        cell2.innerHTML = '<input type="text" id="memo'+lng+'" class="memo">';
+        // cell3.innerHTML = '<input type="button" value=× id="coladd" onclick="coldel(this)">';
+    }
+    
+// 保存クリックイベント
+    $("#save").on("click",function(){
+        localStorage.clear();
+        let lng = $("#checklist tr").length
+        for(let i=0; i<lng; i++){
+            const key = $("#memo"+i).val();
+            const value = $("#check_box"+i).prop("checked");
+            localStorage.setItem(key,value);
+        }
+    });
+
+// チェック全解除クリックイベント
+    $("#check_clear").on("click",function(){
+        let lng = $("#checklist tr").length
+        for(let i=0; i<lng; i++){
+            $("#check_box"+i).prop("checked", false);
+        }
+    })
+
+// リロード再表示
+    for(let i=0; i<localStorage.length; i++){
+        const key   = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        if(value=="true"){
+            const html = '<tr><td><input type="checkbox" checked=checked id="check_box'+i+'"></td><td><input type="text" id="memo'+i+'" value='+key+'></td></tr>';
+            $("#checklist").append(html);
+        } else {
+            const html = '<tr><td><input type="checkbox" id="check_box'+i+'"></td><td><input type="text" id="memo'+i+'" value='+key+'></td></tr>';
+            $("#checklist").append(html);
+        }
+    }
+
+// 行削除
+    // function coldel(obj) {
+    //     // 削除ボタンを押下された行を取得
+    //     tr = obj.parentNode.parentNode;
+    //     // trのインデックスを取得して行を削除する
+    //     tr.parentNode.deleteRow(tr.sectionRowIndex);
+    // }
+
+</script>
+<footer></footer>
+</body>
+</html>
